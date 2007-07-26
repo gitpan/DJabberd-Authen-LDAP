@@ -1,0 +1,5 @@
+Revision history for DJabberd-Authen-LDAP
+
+0.01    2007-07-26
+        Initial Revision. Only supports rebinding
+
