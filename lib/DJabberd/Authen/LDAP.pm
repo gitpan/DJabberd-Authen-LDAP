@@ -18,10 +18,10 @@ DJabberd::Authen::LDAP - An LDAP authentication module for DJabberd
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 =head1 SYNOPSIS
 
@@ -46,7 +46,9 @@ The Only LDAPMethod supported at the moment is rebind which performs a bind as L
  or does anonymous bind, then searches for the user using LDAPFilter and then will rebind
  as the found DN to verify the password.
 
-LDAPFilter is an LDAP filter with a %u that will be substituted with the incoming userid
+LDAPFilter is an LDAP filter substutions
+  - %u will be substituted with the incoming userid (w/o the domain) (ie. myuser)
+  - %d will be substituted with the incoming userid's domain (ie. mydoman.com)
 
 =head1 AUTHOR
 
@@ -133,7 +135,9 @@ sub check_cleartext {
     }
     
     my $filter = $self->{'ldap_filter'};
+    my $vhost = $conn->vhost->server_name;
     $filter =~ s/%u/$username/;
+    $filter =~ s/%d/$vhost/;
     $logger->info("Searching $filter on ".$self->{'ldap_basedn'});
     my $srch = $ldap->search(
 	base=>$self->{'ldap_basedn'},
