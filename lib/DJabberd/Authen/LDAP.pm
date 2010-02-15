@@ -18,10 +18,10 @@ DJabberd::Authen::LDAP - An LDAP authentication module for DJabberd
 
 =head1 VERSION
 
-Version 0.02
+Version 0.03
 =cut
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 =head1 SYNOPSIS
 
@@ -35,6 +35,7 @@ our $VERSION = '0.02';
             LDAPBindPW		pass
             LDAPBaseDN		ou=people
             LDAPFilter		(&(inetAuthorizedServices=jabber)(uid=%u))
+            LDAPVersion         2
             LDAPMethod		rebind
         </Plugin>
     </VHost>
@@ -49,6 +50,9 @@ The Only LDAPMethod supported at the moment is rebind which performs a bind as L
 LDAPFilter is an LDAP filter substutions
   - %u will be substituted with the incoming userid (w/o the domain) (ie. myuser)
   - %d will be substituted with the incoming userid's domain (ie. mydoman.com)
+
+LDAPVersion is either 2 or 3, if nothing is specified then default to Net::LDAP default.
+This value is passed straight to Net::LDAP
 
 =head1 AUTHOR
 
@@ -83,6 +87,11 @@ sub set_config_ldapfilter {
     $self->{'ldap_filter'} = $ldapfilter;
 }
 
+sub set_config_ldapversion {
+    my ($self, $ldapversion) = @_;
+    $self->{'ldap_version'} = $ldapversion;
+}
+
 sub set_config_ldapmethod {
     my ($self, $ldapmethod) = @_;
     if ( $ldapmethod =~ /^(?:rebind)$/ ) {
@@ -96,8 +105,8 @@ sub finalize {
     my $self = shift;
     $logger->error_die("Invalid LDAP URI") unless $self->{ldap_uri};
     $logger->error_die("No LDAP BaseDN Specified") unless $self->{ldap_basedn};
-    if (not defined $self->{'ldap_method'}) { $self->{'ldap_type'} = 'rebind'; }
-    for ($self->{ldap_type}) {
+    if (not defined $self->{'ldap_method'}) { $self->{'ldap_method'} = 'rebind'; }
+    for ($self->{ldap_method}) {
 	if (/^rebind$/) {
 	    # check additional required params
 	    $logger->error_die("Must specify filter with userid as %u") unless $self->{ldap_filter};
@@ -105,8 +114,12 @@ sub finalize {
 	    $logger->error_die("Invalid LDAP Authentication Method");
 	}
     }
+
+    my %options;
+    $options{version} = $self->{ldap_version} if $self->{ldap_version};
+
     # Initialize ldap connection
-    $self->{'ldap_conn'} = Net::LDAP->new($self->{ldap_uri})
+    $self->{'ldap_conn'} = Net::LDAP->new($self->{ldap_uri}, %options)
 	or $logger->error_die("Could not connect to LDAP Server ".$self->{ldap_uri});
 }
 
@@ -131,7 +144,7 @@ sub check_cleartext {
     	    $cb->decline;
     	}
     } else {
-	$ldap->unbind;
+	$ldap->bind;
     }
     
     my $filter = $self->{'ldap_filter'};
@@ -165,7 +178,7 @@ sub check_cleartext {
 =head1 COPYRIGHT & LICENSE
 
 Original work Copyright 2006 Alexander Karelas, Martin Atkins, Brad Fitzpatrick and Aleksandar Milanov. All rights reserved.
-Copyright 2007 Edward Rudd. All rights reserved.
+Copyright 2007-2010 Edward Rudd. All rights reserved.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

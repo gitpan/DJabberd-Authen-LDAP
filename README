@@ -12,6 +12,9 @@ To install this module, run the following commands:
     make test
     make install
 
+LATEST SOURCE
+
+Latest source code is available via http://git.outoforder.cc/
 
 SUPPORT AND DOCUMENTATION
 
@@ -35,7 +38,7 @@ You can also look for information at:
 
 COPYRIGHT AND LICENCE
 
-Copyright (C) 2007 Edward Rudd
+Copyright (C) 2007-2010 Edward Rudd
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
