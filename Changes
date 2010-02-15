@@ -1,6 +1,6 @@
 Revision history for DJabberd-Authen-LDAP
 
-0.03	2010-02-15
+0.04	2010-02-15
 	Fix LDAP binding issues in RT #39077
 	Add ldap version configuration RT #54101
 	Include RPM spec file

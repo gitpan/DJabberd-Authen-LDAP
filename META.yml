@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                DJabberd-Authen-LDAP
-version:             0.03
+version:             0.04
 abstract:            An LDAP authentication module for DJabberd
 license:             ~
 author:              
